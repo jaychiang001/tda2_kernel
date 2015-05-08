@@ -905,7 +905,7 @@ i2c_p3_exp: &i2c2 {
 };
 
 &mmc4 {
-	status = "okay";
+	status = "disabled";
 	vmmc-supply = <&vmmcwl_fixed>;
 	bus-width = <4>;
 	cap-power-off-card;

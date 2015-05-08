@@ -352,6 +352,16 @@ static inline void setup_nr_cpu_ids(void) { }
 static inline void smp_prepare_cpus(unsigned int maxcpus) { }
 #endif
 
+extern u32 ARM_CCNT_Read(void);
+extern u32 read_fast_counter(void);
+u32 start_time;
+u32 mm_init_dur;
+u32 omaphwmod_dur;
+u32 rest_init_time;
+u32 init_call_time;
+u32 cust_machine_dur;
+u32 root_wait_time;
+
 /*
  * We need to store the untouched command line for future reference.
  * We also need to store the touched command line since the parameter
@@ -384,6 +394,7 @@ static noinline void __init_refok rest_init(void)
 {
 	int pid;
 
+	rest_init_time = read_fast_counter();
 	rcu_scheduler_starting();
 	smpboot_thread_init();
 	/*
@@ -478,6 +489,7 @@ void __init __weak thread_info_cache_init(void)
  */
 static void __init mm_init(void)
 {
+	mm_init_dur = read_fast_counter();
 	/*
 	 * page_ext requires contiguous pages,
 	 * bigger than MAX_ORDER unless SPARSEMEM.
@@ -489,12 +501,20 @@ static void __init mm_init(void)
 	pgtable_init();
 	vmalloc_init();
 	ioremap_huge_init();
+	mm_init_dur = read_fast_counter() - mm_init_dur;
 }
 
 asmlinkage __visible void __init start_kernel(void)
 {
 	char *command_line;
 	char *after_dashes;
+	u32 start_time_pmu;
+	u32 setup_arch_time_pmu;
+	u32 setup_arch_time_32k;
+
+	start_time_pmu = ARM_CCNT_Read();
+
+	start_time_pmu = ARM_CCNT_Read();
 
 	/*
 	 * Need to run as early as possible, to initialize the
@@ -523,6 +543,18 @@ asmlinkage __visible void __init start_kernel(void)
 	page_address_init();
 	pr_notice("%s", linux_banner);
 	setup_arch(&command_line);
+
+	setup_arch_time_pmu = ARM_CCNT_Read();
+	setup_arch_time_32k = read_fast_counter();
+
+	{
+		/* This is in CPU ticks. Assuming 1 GHz */
+		u32 till_set_arch_dur = (setup_arch_time_pmu - start_time_pmu);
+
+		till_set_arch_dur = (till_set_arch_dur/477);
+		start_time = setup_arch_time_32k - till_set_arch_dur;
+	}
+
 	mm_init_cpumask(&init_mm);
 	setup_command_line(command_line);
 	setup_nr_cpu_ids();
@@ -879,7 +911,9 @@ static void __init do_basic_setup(void)
 	init_irq_proc();
 	do_ctors();
 	usermodehelper_enable();
+	init_call_time = read_fast_counter();
 	do_initcalls();
+	init_call_time = read_fast_counter() - init_call_time;
 	random_int_secret_init();
 }
 
@@ -925,6 +959,7 @@ static int try_to_run_init_process(const char *init_filename)
 }
 
 static noinline void __init kernel_init_freeable(void);
+extern void kernel_update_dt_with_boottimes(void);
 
 #ifdef CONFIG_DEBUG_RODATA
 static bool rodata_enabled = true;
@@ -964,8 +999,10 @@ static int __ref kernel_init(void *unused)
 
 	if (ramdisk_execute_command) {
 		ret = run_init_process(ramdisk_execute_command);
-		if (!ret)
+		if (!ret) {
+			kernel_update_dt_with_boottimes();
 			return 0;
+		}
 		pr_err("Failed to execute %s (error %d)\n",
 		       ramdisk_execute_command, ret);
 	}
@@ -978,16 +1015,20 @@ static int __ref kernel_init(void *unused)
 	 */
 	if (execute_command) {
 		ret = run_init_process(execute_command);
-		if (!ret)
+		if (!ret) {
+			kernel_update_dt_with_boottimes();
 			return 0;
+		}
 		panic("Requested init %s failed (error %d).",
 		      execute_command, ret);
 	}
 	if (!try_to_run_init_process("/sbin/init") ||
 	    !try_to_run_init_process("/etc/init") ||
 	    !try_to_run_init_process("/bin/init") ||
-	    !try_to_run_init_process("/bin/sh"))
+	    !try_to_run_init_process("/bin/sh")) {
+		kernel_update_dt_with_boottimes();
 		return 0;
+	}
 
 	panic("No working init found.  Try passing init= option to kernel. "
 	      "See Linux Documentation/init.txt for guidance.");

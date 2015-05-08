@@ -2404,3 +2404,33 @@
 };
 
 /include/ "dra7xx-clocks.dtsi"
+
+/ {
+	chosen {
+		/* Counters for events in bootloader */
+		m-entry-time = <0x0000000>;
+		m-boardinit-time = <0x00000000>;
+		m-heap-init-dur = <0x00000000>;
+		m-spi-init-dur = <0x00000000>;
+		m-mmc-init-dur = <0x00000000>;
+		m-image-load-dur = <0x00000000>;
+		m-kernelstart-time = <0x00000000>;
+
+		/* For future use in bootloader */
+		m-display-time = <0x00000000>;
+		m-dsp1start-time = <0x00000000>;
+		m-dsp2start-time = <0x00000000>;
+		m-ipu1start-time = <0x00000000>;
+		m-ipu2start-time = <0x00000000>;
+
+		/* counters for events in kernel */
+		k-start-time = <0x00000000>;
+		k-hwmod-dur = <0x00000000>;
+		k-mm-init-dur = <0x00000000>;
+		k-rest-init-time = <0x00000000>;
+		k-cust-machine-dur = <0x00000000>;
+		k-user-space-entry-time = <0x00000000>;
+		k-init-call-dur = <0x00000000>;
+		k-root-wait-dur = <0x00000000>;
+	};
+};

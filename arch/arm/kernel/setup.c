@@ -841,8 +841,12 @@ struct screen_info screen_info = {
 };
 #endif
 
+extern u32 read_fast_counter(void);
+extern u32 cust_machine_dur;
+
 static int __init customize_machine(void)
 {
+	cust_machine_dur = read_fast_counter();
 	/*
 	 * customizes platform devices, or adds new ones
 	 * On DT based machines, we fall back to populating the
@@ -857,6 +861,7 @@ static int __init customize_machine(void)
 		of_platform_populate(NULL, of_default_bus_match_table,
 					NULL, NULL);
 #endif
+	cust_machine_dur = read_fast_counter() - cust_machine_dur;
 	return 0;
 }
 arch_initcall(customize_machine);

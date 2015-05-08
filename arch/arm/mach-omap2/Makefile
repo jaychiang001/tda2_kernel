@@ -45,6 +45,10 @@ AFLAGS_omap-headsmp.o			:=-Wa,-march=armv7-a$(plus_sec)
 AFLAGS_omap-smc.o			:=-Wa,-march=armv7-a$(plus_sec)
 AFLAGS_sleep44xx.o			:=-Wa,-march=armv7-a$(plus_sec)
 
+# Add PMU access for performance monitoring
+obj-y += performance_unit.o
+AFLAGS_performance_unit.o := -Wa,-march=armv7-a
+
 # Functions loaded to SRAM
 obj-$(CONFIG_SOC_OMAP2420)		+= sram242x.o
 obj-$(CONFIG_SOC_OMAP2430)		+= sram243x.o
@@ -269,3 +273,7 @@ obj-$(CONFIG_OMAP_IOMMU)		+= omap-iommu.o
 ifneq ($(CONFIG_OMAP_REMOTEPROC),)
 obj-y					+= remoteproc.o
 endif
+
+CFLAGS_omap_hwmod.o += -O0
+CFLAGS_remoteproc.o += -O0
+obj-$(CONFIG_SOC_DRA7XX) += board-dra7xx.o

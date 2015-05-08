@@ -543,6 +543,8 @@ void __init mount_root(void)
 #endif
 }
 
+extern u32 root_wait_time;
+extern u32 read_fast_counter(void);
 /*
  * Prepare the namespace - decide what/where to mount, load ramdisks, etc.
  */
@@ -582,6 +584,7 @@ void __init prepare_namespace(void)
 	if (initrd_load())
 		goto out;
 
+	root_wait_time = read_fast_counter();
 	/* wait for any asynchronous scanning to complete */
 	if ((ROOT_DEV == 0) && root_wait) {
 		printk(KERN_INFO "Waiting for root device %s...\n",
@@ -591,6 +594,7 @@ void __init prepare_namespace(void)
 			msleep(100);
 		async_synchronize_full();
 	}
+	root_wait_time = read_fast_counter() - root_wait_time;
 
 	is_floppy = MAJOR(ROOT_DEV) == FLOPPY_MAJOR;
 

@@ -48,6 +48,7 @@ static void __iomem *l2cache_base;
 static void __iomem *sar_ram_base;
 static void __iomem *gic_dist_base_addr;
 static void __iomem *twd_base;
+static void __iomem *timer_32k;
 
 #define IRQ_LOCALTIMER		29
 
@@ -168,6 +169,18 @@ void __init omap_barriers_init(void)
 		&dram_sync_paddr, dram_sync);
 
 	soc_mb = omap4_mb;
+}
+
+#define COUNTER32K_CR	0x4AE04030
+
+u32 read_fast_counter(void)
+{
+	u32 reg_val;
+
+	timer_32k = ioremap(COUNTER32K_CR, SZ_512);
+	reg_val = (u32) __raw_readw(timer_32k);
+	reg_val |= (u32)(__raw_readw(timer_32k+2) << 16);
+	return reg_val;
 }
 
 #endif

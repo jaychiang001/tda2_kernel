@@ -235,6 +235,14 @@ static unsigned short free_ls, max_ls, ls_supp;
 /* inited: set to true once the hwmod code is initialized */
 static bool inited;
 
+static LIST_HEAD(omap_ti_hwmod_list);
+struct oh_np_index_list {
+	struct device_node *np;
+	int index;
+	struct list_head node;
+	const char *name;
+};
+
 /* Private functions */
 
 /**
@@ -2347,6 +2355,71 @@ static int of_dev_find_hwmod(struct device_node *np,
 	return -ENODEV;
 }
 
+static int of_dev_hwmod_list_lookup(const char *oh_name,
+				    int *index,
+				    struct device_node **found)
+{
+	struct oh_np_index_list *temp_node;
+
+	if (list_empty(&omap_ti_hwmod_list))
+		return 1;
+
+	*found = NULL;
+	*index = 0;
+
+	list_for_each_entry(temp_node, &omap_ti_hwmod_list, node) {
+		if (strcmp(oh_name, temp_node->name) == 0) {
+			*index = temp_node->index;
+			*found =  temp_node->np;
+			return 0;
+		}
+	}
+
+	return -ENODEV;
+}
+/**
+ * Builds a list of "ti,hwmods" and their indices for use by later
+ * code.
+ *
+ */
+static int __init omap_hwmod_build_ti_hwmod_list(void)
+{
+	struct device_node *bus;
+	struct device_node *np;
+	int count, i, res;
+	const char *p;
+
+	if (!of_have_populated_dt())
+		return 0;
+
+	bus = of_find_node_by_name(NULL, "ocp");
+	if (!bus)
+		return -ENODEV;
+
+	for_each_node_with_property(np, "ti,hwmods") {
+		count = of_property_count_strings(np, "ti,hwmods");
+		if (count < 1)
+			continue;
+		for (i = 0; i < count; i++) {
+			struct oh_np_index_list *item = NULL;
+
+			res = of_property_read_string_index(np, "ti,hwmods",
+							    i, &p);
+			if (res)
+				continue;
+			item = kzalloc(sizeof(*item), GFP_KERNEL);
+			if (!item)
+				return -ENOMEM;
+			item->index = i;
+			item->np = np;
+			item->name = p;
+			list_add(&item->node, &omap_ti_hwmod_list);
+		}
+
+
+	}
+	return 0;
+}
 /**
  * of_dev_hwmod_lookup - look up needed hwmod from dt blob
  * @np: struct device_node *
@@ -2365,6 +2438,11 @@ static int of_dev_hwmod_lookup(struct device_node *np,
 {
 	struct device_node *np0 = NULL;
 	int res;
+
+	res = of_dev_hwmod_list_lookup(oh->name, index,
+				     found);
+	if (res <= 0)
+		return res;
 
 	res = of_dev_find_hwmod(np, oh);
 	if (res >= 0) {
@@ -2480,6 +2558,7 @@ static int __init _init_mpu_rt_base(struct omap_hwmod *oh, void *data,
 	oh->_mpu_rt_va = va_start;
 	return 0;
 }
+
 
 /**
  * _init - initialize internal data for the hwmod @oh
@@ -3377,6 +3456,8 @@ int __init omap_hwmod_setup_one(const char *oh_name)
 	return 0;
 }
 
+extern u32 read_fast_counter(void);
+extern u32 omaphwmod_dur;
 /**
  * omap_hwmod_setup_all - set up all registered IP blocks
  *
@@ -3387,10 +3468,13 @@ int __init omap_hwmod_setup_one(const char *oh_name)
  */
 static int __init omap_hwmod_setup_all(void)
 {
+	omaphwmod_dur = read_fast_counter();
+	omap_hwmod_build_ti_hwmod_list();
 	_ensure_mpu_hwmod_is_setup(NULL);
 
 	omap_hwmod_for_each(_init, NULL);
 	omap_hwmod_for_each(_setup, NULL);
+	omaphwmod_dur = read_fast_counter() - omaphwmod_dur;
 
 	return 0;
 }
