@@ -589,10 +589,3 @@ video_in: &vin2a {
 	status = "okay";
 	memory-region = <&dsp1_cma_pool>;
 };
-
-#include "dra7xx-jamr3.dtsi"
-&tvp_5158{
-	mux-gpios = <&pcf_hdmi 2 GPIO_ACTIVE_LOW>,	/*VIN2_S0*/
-		    <&pcf_jamr3_21 8 GPIO_ACTIVE_LOW>,	/*SEL_TVP_FPD*/
-		    <&pcf_hdmi 6 GPIO_ACTIVE_HIGH>;	/*VIN2_S2*/
-};
