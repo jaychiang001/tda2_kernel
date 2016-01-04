@@ -548,7 +548,8 @@ static void __rpmsg_proto_cb(struct device *dev, int from_vproc_id, void *data,
 #endif
 
 	if (!sk) {
-		dev_warn(dev, "callback for deleted socket (from %d)\n", src);
+		dev_warn(dev, "callback received for deleted socket (from %d)\n",
+			 src);
 		return;
 	}
 
