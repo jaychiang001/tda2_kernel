@@ -624,7 +624,7 @@ static int rpmsg_proto_probe(struct rpmsg_channel *rpdev)
 			id);
 
 	if (dst == RPMSG_ADDR_ANY) {
-		/* Set announce to false and avoid extra delay when binding. */
+		/* do not announce bound sockets to remote processor */
 		rpdev->announce = false;
 		return 0;
 	}
