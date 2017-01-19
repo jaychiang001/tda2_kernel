@@ -502,6 +502,7 @@ dtb-$(CONFIG_SOC_DRA7XX) += \
 	dra7-evm-lcd-osd-late-attach.dtb \
 	dra7-evm-fpd-auo-g101evn01.0.dtb \
 	dra7-evm-vision.dtb \
+	dra7-evm-infoadas.dtb \
 	am57xx-beagle-x15.dtb \
 	am57xx-beagle-x15-revb1.dtb \
 	am571x-idk.dtb \
@@ -521,6 +522,7 @@ dtb-$(CONFIG_SOC_DRA7XX) += \
 	dra72-evm-revc-lcd-osd101t2045.dtb \
 	dra72-evm-revc-lcd-osd101t2587.dtb \
 	dra72-evm-vision.dtb \
+	dra72-evm-infoadas.dtb \
 	dra71-evm.dtb \
 	dra71-evm-lcd-auo-g101evn01.0.dtb \
 	dra76-evm.dtb \
@@ -528,7 +530,10 @@ dtb-$(CONFIG_SOC_DRA7XX) += \
 	dra7-evm-late-attach.dtb \
 	dra72-evm-late-attach.dtb \
 	dra71-evm-late-attach.dtb \
-	dra76-evm-late-attach.dtb
+	dra76-evm-late-attach.dtb \
+	dra76-evm-infoadas.dtb \
+	dra71-evm-vision.dtb \
+	dra71-evm-infoadas.dtb
 dtb-$(CONFIG_ARCH_ORION5X) += \
 	orion5x-lacie-d2-network.dtb \
 	orion5x-lacie-ethernet-disk-mini-v2.dtb \
