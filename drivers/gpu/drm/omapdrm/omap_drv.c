@@ -34,6 +34,8 @@
 #define DRIVER_MINOR		0
 #define DRIVER_PATCHLEVEL	0
 
+#define  DISPLAY_ON_A15_LINUX 0
+
 static int num_crtc = CONFIG_DRM_OMAP_NUM_CRTCS;
 
 MODULE_PARM_DESC(num_crtc, "Number of overlays to use as CRTCs");
@@ -260,6 +262,7 @@ static void omap_disconnect_dssdevs(void)
 
 static int omap_connect_dssdevs(void)
 {
+#if DISPLAY_ON_A15_LINUX
 	int r;
 	struct omap_dss_device *dssdev = NULL;
 
@@ -287,6 +290,9 @@ cleanup:
 	omap_disconnect_dssdevs();
 
 	return r;
+#else
+	return 0;
+#endif
 }
 
 static int omap_modeset_create_crtc(struct drm_device *dev, int id,
