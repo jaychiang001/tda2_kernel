@@ -96,12 +96,6 @@ i2cexp: &i2c5 {
 	status = "disabled";
 };
 
-&pcf_gpio_21 {
-	cpsw_sel_s0 {
-		status = "disabled";
-	};
-};
-
 &vin1a {
 	status = "okay";
 	endpoint@0 {
