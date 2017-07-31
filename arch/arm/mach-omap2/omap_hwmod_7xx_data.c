@@ -1667,6 +1667,29 @@ static struct omap_hwmod dra7xx_mailbox13_hwmod = {
 };
 
 /*
+ * 'mcan' class
+ *
+ */
+static struct omap_hwmod_class dra76x_mcan_hwmod_class = {
+	.name	= "mcan",
+};
+
+/* mcan */
+static struct omap_hwmod dra76x_mcan_hwmod = {
+	.name		= "mcan",
+	.class		= &dra76x_mcan_hwmod_class,
+	.clkdm_name	= "wkupaon_clkdm",
+	.main_clk	= "mcan_clk",
+	.prcm = {
+		.omap4 = {
+			.clkctrl_offs = DRA7XX_CM_WKUPAON_ADC_CLKCTRL_OFFSET,
+			.context_offs = DRA7XX_RM_WKUPAON_ADC_CONTEXT_OFFSET,
+			.modulemode   = MODULEMODE_SWCTRL,
+		},
+	},
+};
+
+/*
  * 'mcspi' class
  *
  */
@@ -3289,29 +3312,6 @@ static struct omap_hwmod dra7xx_wd_timer2_hwmod = {
 		.omap4 = {
 			.clkctrl_offs = DRA7XX_CM_WKUPAON_WD_TIMER2_CLKCTRL_OFFSET,
 			.context_offs = DRA7XX_RM_WKUPAON_WD_TIMER2_CONTEXT_OFFSET,
-			.modulemode   = MODULEMODE_SWCTRL,
-		},
-	},
-};
-
-/*
- * 'mcan' class
- *
- */
-static struct omap_hwmod_class dra76x_mcan_hwmod_class = {
-	.name	= "mcan",
-};
-
-/* mcan */
-static struct omap_hwmod dra76x_mcan_hwmod = {
-	.name		= "mcan",
-	.class		= &dra76x_mcan_hwmod_class,
-	.clkdm_name	= "wkupaon_clkdm",
-	.main_clk	= "mcan_clk",
-	.prcm = {
-		.omap4 = {
-			.clkctrl_offs = DRA7XX_CM_WKUPAON_ADC_CLKCTRL_OFFSET,
-			.context_offs = DRA7XX_RM_WKUPAON_ADC_CONTEXT_OFFSET,
 			.modulemode   = MODULEMODE_SWCTRL,
 		},
 	},
