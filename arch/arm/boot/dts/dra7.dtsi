@@ -2084,6 +2084,12 @@
 			};
 		};
 
+		debugss {
+			compatible = "ti,dra7xx-debugss";
+			clocks = <&sys_clkin1>;
+			clock-names = "sysclockin1";
+		};
+
 		dcan1: can@481cc000 {
 			compatible = "ti,dra7-d_can";
 			ti,hwmods = "dcan1";
