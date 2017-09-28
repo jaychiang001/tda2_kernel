@@ -22,6 +22,148 @@
 
 #include "omap_device.h"
 #include "remoteproc.h"
+#include "soc.h"
+
+#define DSP1_EDMA_TPCC			0x40D10000
+#define DSP2_EDMA_TPCC			0x41510000
+#define DSP1_EDMA_TPTC0			0x40D05000
+#define DSP2_EDMA_TPTC0			0x41505000
+#define EDMA_TPCC_CCSTAT_OFFSET		0x640
+#define EDMA_TPCC_EECR_OFFSET		0x1028
+#define EDMA_TPCC_EECRH_OFFSET		0x102C
+#define EDMA_TPCC_QEECR_OFFSET		0x1088
+#define EDMA_DSP_TPTC1_OFFSET		0x1000
+#define EDMA_TPTC_TCSTAT0_OFFSET	0x100
+#define EDMA_TPTC_TCSTAT1_OFFSET	(EDMA_DSP_TPTC1_OFFSET + \
+					EDMA_TPTC_TCSTAT0_OFFSET)
+
+#define CTRL_CORE_DMA_DSP1_DREQ		0x4A002CF8
+#define CTRL_CORE_DMA_DSP2_DREQ		0x4A002D20
+
+static void dra7_wait_dsp_edma_compl(u32 inst)
+{
+	u32 dsp_edma_tpcc_base, dsp_edma_tptc_base;
+	int timeout;
+	void __iomem *tpcc_base, *tptc_base;
+
+	if (!soc_is_dra7xx())
+		return;
+
+	dsp_edma_tpcc_base = inst ? DSP2_EDMA_TPCC : DSP1_EDMA_TPCC;
+	dsp_edma_tptc_base = inst ? DSP2_EDMA_TPTC0 : DSP1_EDMA_TPTC0;
+
+	tpcc_base = ioremap(dsp_edma_tpcc_base, SZ_16K);
+	if (!tpcc_base) {
+		pr_err("DSP EDMA TPCC ioremap failed\n");
+		goto map_err1;
+	}
+
+	tptc_base = ioremap(dsp_edma_tptc_base, SZ_8K);
+	if (!tptc_base) {
+		pr_err("DSP EDMA TPTC ioremap failed\n");
+		goto map_err2;
+	}
+
+	/* Disable all future EDMA and QDMA events to DSPx EDMA TPCC */
+	writel_relaxed(0xFFFFFFFF, tpcc_base + EDMA_TPCC_EECR_OFFSET);
+	writel_relaxed(0xFFFFFFFF, tpcc_base + EDMA_TPCC_EECRH_OFFSET);
+	writel_relaxed(0xFFFFFFFF, tpcc_base + EDMA_TPCC_QEECR_OFFSET);
+
+	/*
+	 * Poll CCSTAT to ensure all actively serviced or queued events have
+	 * been completed.
+	 *
+	 * The timeout is based on the duration which the EDMA CC queue will
+	 * drain based on the slowest typical application.  This is chosen to
+	 * be 1.0625ms, which assumes a full event queue with transfers for
+	 * an 8kHz audio stream, plus one extra transfer for safe measure.
+	 */
+	timeout = 1063;
+	pr_warn("waiting for DSP%d EDMA traffic on TPCC to complete\n",
+		inst+1);
+	while (((readl_relaxed(tpcc_base + EDMA_TPCC_CCSTAT_OFFSET))
+		!= 0x0) && --timeout)
+		udelay(1);
+	if (timeout == 0)
+		pr_warn("DSP%d EDMA transaction may be ongoing during shutdown! TPCC is active!\n",
+			inst + 1);
+
+	/*
+	 * Check that PROGBUSY SRCACTV WSACTV, and DSTACTV bits of TCSTAT
+	 * registers for DSP TPTC0 and TPTC1 are cleared prior to shutdown.
+	 *
+	 * The timeout is based on the duration of the EDMA transfer expected
+	 * by the slowest typical application, which is chosen as 125us.  This
+	 * would be the transfer request rate of an 8kHz audio stream, with one
+	 * extra transfer for safe measure.
+	 */
+	timeout = 125;
+	pr_warn("waiting for DSP%d EDMA traffic on TPTC0 to complete\n",
+		inst+1);
+	while (((readl_relaxed(tptc_base + EDMA_TPTC_TCSTAT0_OFFSET) & 0x77)
+		!= 0x0) && --timeout)
+		udelay(1);
+	if (timeout == 0)
+		pr_warn("DSP%d EDMA transaction may be ongoing during shutdown! TPTC0 is active!\n",
+			inst + 1);
+
+	timeout = 125;
+	pr_warn("waiting for DSP%d EDMA traffic on TPTC1 to complete\n",
+		inst+1);
+	while (((readl_relaxed(tptc_base + EDMA_TPTC_TCSTAT1_OFFSET) & 0x77)
+		!= 0x0) && --timeout)
+		udelay(1);
+	if (timeout == 0)
+		pr_warn("DSP%d EDMA transaction may be ongoing during shutdown! TPTC1 is active!\n",
+			inst + 1);
+	iounmap(tptc_base);
+map_err2:
+	iounmap(tpcc_base);
+map_err1:
+	return;
+}
+
+static void dra7_clear_dsp_edma_xbar(u32 inst)
+{
+	u32 dsp_dreq_base;
+	void __iomem *iomem_base;
+	u8 offset;
+
+	if (!soc_is_dra7xx())
+		return;
+
+	dsp_dreq_base = inst ? CTRL_CORE_DMA_DSP2_DREQ :
+			CTRL_CORE_DMA_DSP1_DREQ;
+
+	iomem_base = ioremap(dsp_dreq_base, SZ_64);
+	if (!iomem_base) {
+		pr_err("DSP EDMA ioremap failed\n");
+		return;
+	}
+
+	pr_warn("Clearing all EDMA XBAR routings to DSP%d\n", inst+1);
+
+	/*
+	 * Clear all connections to DSPx EDMA crossbar, from
+	 * CTRL_CORE_DMA_DSPx_DREQ_0_1 to CTRL_CORE_DMA_DSPx_DREQ_18_19.
+	 */
+	for (offset = 0x0; offset <= 0x24; offset += 0x4)
+		writel_relaxed(0x0, iomem_base + offset);
+
+	iounmap(iomem_base);
+}
+
+void dra7_dsp1_pre_shutdown(void)
+{
+	dra7_clear_dsp_edma_xbar(0);
+	dra7_wait_dsp_edma_compl(0);
+}
+
+void dra7_dsp2_pre_shutdown(void)
+{
+	dra7_clear_dsp_edma_xbar(1);
+	dra7_wait_dsp_edma_compl(1);
+}
 
 /**
  * omap_rproc_device_enable - enable the remoteproc device

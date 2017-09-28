@@ -45,12 +45,13 @@ struct omap_rproc_timer_ops {
  * struct omap_rproc_pdata - omap remoteproc's platform data
  * @device_enable: omap-specific handler for enabling a device
  * @device_shutdown: omap-specific handler for shutting down a device
+ * @pre_shutdown: omap-specific handler for performing pre-shutdown cleanup
  * @timer_ops: platform data ops for OMAP dmtimer handlers
  */
 struct omap_rproc_pdata {
 	int (*device_enable)(struct platform_device *pdev);
 	int (*device_shutdown)(struct platform_device *pdev);
-
+	void (*pre_shutdown)(void);
 	struct omap_rproc_timer_ops *timer_ops;
 };
 
