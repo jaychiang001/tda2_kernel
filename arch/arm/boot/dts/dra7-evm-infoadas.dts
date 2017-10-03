@@ -11,6 +11,12 @@
 #define DISABLE_COMPLETE(label) &label { status = "disabled"; ti,no-idle; ti,no-reset-on-init; }
 #define LATE_ATTACH(label) &label { ti,late-attach; ti,no-idle; ti,no-reset-on-init; }
 
+/ {
+	chosen {
+		bootargs = "console=ttyO0,115200n8 elevator=noop root=/dev/mmcblk1p2 rw rootwait earlyprintk fixrtc omapdrm.num_crtc=2 consoleblank=0 cma=64M rootfstype=ext4 snd.slots_reserved=1,1 loglevel=0 init=/home/root/init-demo.sh clk_ignore_unused";
+	};
+};
+
 /* modules used by BIOS, disable from Linux */
 DISABLE_COMPLETE(vip1);
 DISABLE_COMPLETE(vip2);
@@ -29,6 +35,32 @@ DISABLE_PRCM(gpio1);
 DISABLE_PRCM(gpio2);
 DISABLE_PRCM(gpio4);
 DISABLE_PRCM(gpio6);
+
+/* Remote cores loaded by bootloader */
+LATE_ATTACH(ipu1);
+LATE_ATTACH(mmu_ipu1);
+LATE_ATTACH(ipu2);
+LATE_ATTACH(mmu_ipu2);
+LATE_ATTACH(dsp1);
+LATE_ATTACH(mmu0_dsp1);
+LATE_ATTACH(mmu1_dsp1);
+LATE_ATTACH(dsp2);
+LATE_ATTACH(mmu0_dsp2);
+LATE_ATTACH(mmu1_dsp2);
+
+/* timers used by the remote cores */
+LATE_ATTACH(timer3);
+LATE_ATTACH(timer4);
+LATE_ATTACH(timer5);
+LATE_ATTACH(timer6);
+LATE_ATTACH(timer7);
+LATE_ATTACH(timer9);
+LATE_ATTACH(timer11);
+LATE_ATTACH(timer13);
+LATE_ATTACH(timer14);
+LATE_ATTACH(mailbox5);
+LATE_ATTACH(mailbox6);
+LATE_ATTACH(mailbox7);
 
 /* Linux uses first 32 channels, BIOS uses last 32 */
 &edma {
@@ -87,6 +119,13 @@ DISABLE_PRCM(gpio6);
 	vsdk_eve_mem: vsdk_eve_mem@A5000000 {
 		compatible = "shared-dma-pool";
 		reg = <0x0 0xA5000000 0x0 0x4000000>;
+		status = "okay";
+	};
+
+	/* Memory reserved for IOMMU table carveout in u-boot */
+	latea_pagetbl: late_pgtbl@bfc00000 {
+		reg = <0x0 0xbfc00000 0x0 0x100000>;
+		no-map;
 		status = "okay";
 	};
 };
