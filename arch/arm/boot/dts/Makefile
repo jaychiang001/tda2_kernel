@@ -503,6 +503,7 @@ dtb-$(CONFIG_SOC_DRA7XX) += \
 	dra7-evm-fpd-auo-g101evn01.0.dtb \
 	dra7-evm-vision.dtb \
 	dra7-evm-infoadas.dtb \
+	dra7-evm-infoadas-lcd-lg.dtb \
 	am57xx-beagle-x15.dtb \
 	am57xx-beagle-x15-revb1.dtb \
 	am571x-idk.dtb \
@@ -523,6 +524,7 @@ dtb-$(CONFIG_SOC_DRA7XX) += \
 	dra72-evm-revc-lcd-osd101t2587.dtb \
 	dra72-evm-vision.dtb \
 	dra72-evm-infoadas.dtb \
+	dra72-evm-infoadas-lcd-lg.dtb \
 	dra71-evm.dtb \
 	dra71-evm-lcd-auo-g101evn01.0.dtb \
 	dra76-evm.dtb \
