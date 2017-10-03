@@ -651,3 +651,18 @@
 		remote-endpoint = <&csi2_cam0>;
 	};
 };
+
+video_in: &vin1a {
+	status = "okay";
+};
+
+/* Expose generic DT labels for adapter board */
+video_in: &vin1a {};
+i2c_p3_exp: &i2c5 {};
+evm_3v3_sw: &vio_3v3 {};
+
+#include "dra7xx-jamr3.dtsi"
+&tvp_5158{
+	mux-gpios = <&pcf_jamr3_21 8 GPIO_ACTIVE_LOW>;	/*SEL_TVP_FPD*/
+	/* No board muxes on baseboard */
+};
