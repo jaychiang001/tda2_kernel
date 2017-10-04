@@ -534,7 +534,6 @@ dtb-$(CONFIG_SOC_DRA7XX) += \
 	dra71-evm-late-attach.dtb \
 	dra76-evm-late-attach.dtb \
 	dra76-evm-infoadas.dtb \
-	dra71-evm-vision.dtb \
 	dra71-evm-infoadas.dtb
 dtb-$(CONFIG_ARCH_ORION5X) += \
 	orion5x-lacie-d2-network.dtb \
