@@ -4,6 +4,7 @@
 &ldc3001 {
 	interrupt-parent = <&gpio1>;
 	interrupts = <2 IRQ_TYPE_LEVEL_HIGH>;
+	status = "disabled";
 };
 
 &pcf_lcd {
