@@ -629,7 +629,7 @@
 &m_can0 {
 	status = "okay";
 	can-transceiver {
-		max-bitrate = <2000000>;
+		max-bitrate = <5000000>;
 	};
 };
 
