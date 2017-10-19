@@ -533,7 +533,7 @@ static int omap_rproc_stop(struct rproc *rproc)
 	}
 
 	if (pdata->pre_shutdown)
-		pdata->pre_shutdown();
+		pdata->pre_shutdown(pdev);
 
 	ret = pdata->device_shutdown(pdev);
 	if (ret)

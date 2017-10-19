@@ -51,7 +51,7 @@ struct omap_rproc_timer_ops {
 struct omap_rproc_pdata {
 	int (*device_enable)(struct platform_device *pdev);
 	int (*device_shutdown)(struct platform_device *pdev);
-	void (*pre_shutdown)(void);
+	void (*pre_shutdown)(struct platform_device *pdev);
 	struct omap_rproc_timer_ops *timer_ops;
 };
 

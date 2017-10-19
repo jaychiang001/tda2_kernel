@@ -46,9 +46,6 @@ static void dra7_wait_dsp_edma_compl(u32 inst)
 	int timeout;
 	void __iomem *tpcc_base, *tptc_base;
 
-	if (!soc_is_dra7xx())
-		return;
-
 	dsp_edma_tpcc_base = inst ? DSP2_EDMA_TPCC : DSP1_EDMA_TPCC;
 	dsp_edma_tptc_base = inst ? DSP2_EDMA_TPTC0 : DSP1_EDMA_TPTC0;
 
@@ -129,9 +126,6 @@ static void dra7_clear_dsp_edma_xbar(u32 inst)
 	void __iomem *iomem_base;
 	u8 offset;
 
-	if (!soc_is_dra7xx())
-		return;
-
 	dsp_dreq_base = inst ? CTRL_CORE_DMA_DSP2_DREQ :
 			CTRL_CORE_DMA_DSP1_DREQ;
 
@@ -153,16 +147,25 @@ static void dra7_clear_dsp_edma_xbar(u32 inst)
 	iounmap(iomem_base);
 }
 
-void dra7_dsp1_pre_shutdown(void)
+void dra7_dsp_pre_shutdown(struct platform_device *pdev)
 {
-	dra7_clear_dsp_edma_xbar(0);
-	dra7_wait_dsp_edma_compl(0);
-}
+	u32 inst;
 
-void dra7_dsp2_pre_shutdown(void)
-{
-	dra7_clear_dsp_edma_xbar(1);
-	dra7_wait_dsp_edma_compl(1);
+	if (!soc_is_dra7xx())
+		return;
+
+	if (!strcmp(dev_name(&pdev->dev), "40800000.dsp")) {
+		inst = 0;
+	} else if (!strcmp(dev_name(&pdev->dev), "41000000.dsp")) {
+		inst = 1;
+	} else {
+		dev_warn(&pdev->dev, "%s is not applicable for this device.\n",
+			 __func__);
+		return;
+	}
+
+	dra7_clear_dsp_edma_xbar(inst);
+	dra7_wait_dsp_edma_compl(inst);
 }
 
 /**
