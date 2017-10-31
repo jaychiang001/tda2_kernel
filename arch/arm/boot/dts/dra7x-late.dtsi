@@ -1,0 +1,98 @@
+/*
+ * Copyright (C) 2017 Texas Instruments Incorporated - http://www.ti.com/
+ *
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License version 2 as published by
+ * the Free Software Foundation.
+ *
+ * This file conditionally enables late attach on the different remotecores on
+ * the DRA7x SOC.
+ *
+ */
+
+#define LATE_ATTACH(label) &label { \
+	ti,late-attach;\
+	ti,no-idle-on-init;\
+	ti,no-reset-on-init; }
+
+#define NO_MAP(label) &label { \
+	/delete-property/ reusable; \
+	no-map; }
+
+#ifdef IPU1_LATE_ATTACH
+
+LATE_ATTACH(ipu1);
+LATE_ATTACH(timer11);
+LATE_ATTACH(timer7);
+LATE_ATTACH(timer8);
+LATE_ATTACH(mmu_ipu1);
+
+#ifdef LATE_ATTACH_DMA_POOL
+NO_MAP(ipu1_cma_pool);
+#endif
+
+#endif
+
+#ifdef IPU2_LATE_ATTACH
+
+LATE_ATTACH(ipu2);
+LATE_ATTACH(timer3);
+LATE_ATTACH(timer4);
+LATE_ATTACH(timer9);
+LATE_ATTACH(mmu_ipu2);
+
+#ifdef LATE_ATTACH_DMA_POOL
+NO_MAP(ipu2_cma_pool);
+#endif
+
+#endif
+
+
+#ifdef DSP1_LATE_ATTACH
+
+LATE_ATTACH(dsp1);
+LATE_ATTACH(timer5);
+LATE_ATTACH(timer10);
+LATE_ATTACH(mmu0_dsp1);
+LATE_ATTACH(mmu1_dsp1);
+
+#ifdef LATE_ATTACH_DMA_POOL
+NO_MAP(dsp1_cma_pool);
+#endif
+
+#endif
+
+#ifdef DSP2_LATE_ATTACH
+
+LATE_ATTACH(dsp2);
+LATE_ATTACH(timer6);
+LATE_ATTACH(timer13);
+LATE_ATTACH(mmu0_dsp2);
+LATE_ATTACH(mmu1_dsp2);
+
+#ifdef LATE_ATTACH_DMA_POOL
+NO_MAP(dsp2_cma_pool);
+#endif
+
+#endif
+
+/*
+ * Memory reserved for IOMMU table carveout 0xbfc00000 for length 0x100000
+ * Page Table Address for IPU1   0xbfc00000
+ * Page Table Address for IPU2   0xbfc08000
+ * Page Table Address for DSP1   0xbfc10000
+ * Page Table Address for DSP2   0xbfc18000
+ */
+
+#if defined(IPU1_LATE_ATTACH) || defined(IPU2_LATE_ATTACH) || \
+	defined(DSP1_LATE_ATTACH) || defined(DSP2_LATE_ATTACH)
+
+&reserved_mem {
+	latea_pagetbl: late_pgtbl@bfc00000 {
+		reg = <0x0 0xbfc00000 0x0 0x100000>;
+		no-map;
+		status = "okay";
+	};
+};
+
+#endif
