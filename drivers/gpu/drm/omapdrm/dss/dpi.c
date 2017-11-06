@@ -585,8 +585,6 @@ static int dpi_verify_pll(struct dss_pll *pll)
 	if (r)
 		return r;
 
-	dss_pll_disable(pll);
-
 	return 0;
 }
 
