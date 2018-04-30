@@ -9,7 +9,7 @@
 
 #include <dt-bindings/interrupt-controller/arm-gic.h>
 #include <dt-bindings/pinctrl/dra.h>
-
+#include <dt-bindings/drm/vdrm/drm-fourcc.h>
 #include "skeleton.dtsi"
 
 #define MAX_SOURCES 400
@@ -2147,6 +2147,17 @@
 				clock-names = "fck", "sys_clk";
 				dmas = <&sdma_xbar 76>;
 				dma-names = "audio_tx";
+			};
+		};
+
+		vdrm0: vdrm@0 {
+			compatible = "ti,dra7-vdrm";
+			vdrm0_crtc0: crtc@0 {
+				compatible = "ti,dra7-vdrm-crtc";
+				x-res = <1920>;
+				y-res = <1080>;
+				refresh = <60>;
+				supported-formats = <DT_DRM_FORMAT_XRGB8888>;
 			};
 		};
 
