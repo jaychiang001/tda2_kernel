@@ -326,10 +326,41 @@ out:
 	return ret;
 }
 
+static int vdrm_ctrl_provider_gem_to_paddr(struct v_ctrl_device *dev, void *data,
+		struct v_ctrl_file *f_priv)
+{
+	struct v_ctrl_provider_gem_to_paddr *d = data;
+	struct v_ctrl_gem *search, *v_gem = NULL;
+	int ret = 0;
+
+	mutex_lock(&dev->drmdev->struct_mutex);
+	mutex_lock(&dev->gem_list_lock);
+	list_for_each_entry(search, &dev->gem_list, node) {
+		if(search->gem_handle == d->v_gem_handle) {
+			v_gem = search;
+			break;
+		}
+	}
+
+	mutex_unlock(&dev->gem_list_lock);
+	mutex_unlock(&dev->drmdev->struct_mutex);
+
+	if(!v_gem) {
+		ret = -ENOENT;
+		goto out;
+	}
+
+	d->paddr = (uint32_t)v_gem_get_paddr(v_gem->drm_bo);
+
+out:
+	return ret;
+}
+
 static const struct v_ctrl_ioctl_desc v_ctrl_ioctls[] = {
 	VDRMCTRL_IOCTL_DEF(V_CTRL_IOCTL_PROVIDER_CREATE, vdrm_ctrl_provider_create),
 	VDRMCTRL_IOCTL_DEF(V_CTRL_IOCTL_PROVIDER_DESTROY, vdrm_ctrl_provider_destroy),
 	VDRMCTRL_IOCTL_DEF(V_CTRL_IOCTL_PROVIDER_GEM_TO_DMABUF, vdrm_ctrl_provider_gem_to_dmabuf),
+	VDRMCTRL_IOCTL_DEF(V_CTRL_IOCTL_PROVIDER_GEM_TO_PADDR,  vdrm_ctrl_provider_gem_to_paddr)
 };
 
 #define VDRMCTRL_IOCTL_COUNT	ARRAY_SIZE(v_ctrl_ioctls)

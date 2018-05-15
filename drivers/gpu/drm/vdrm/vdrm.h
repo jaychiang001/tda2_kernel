@@ -76,6 +76,7 @@ struct dma_buf *v_gem_prime_export(struct drm_device *dev,
 struct drm_gem_object *v_gem_prime_import(struct drm_device *dev,
 		struct dma_buf *buffer);
 uint32_t v_gem_get_v_ctrl_gem_handle(struct drm_gem_object *bo);
+dma_addr_t v_gem_get_paddr(struct drm_gem_object *bo);
 
 
 int v_controller_init(void);

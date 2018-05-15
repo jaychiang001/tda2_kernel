@@ -78,6 +78,11 @@ struct v_ctrl_provider_gem_to_dmabuf {
 	__u32 size;
 };
 
+struct v_ctrl_provider_gem_to_paddr {
+	__u32 v_gem_handle;
+	__u32 paddr;
+};
+
 #define V_CTRL_IOCTL_BASE			'd'
 #define V_CTRL_IO(nr)				_IO(V_CTRL_IOCTL_BASE,nr)
 #define V_CTRL_IOR(nr,type)			_IOR(V_CTRL_IOCTL_BASE,nr,type)
@@ -86,9 +91,11 @@ struct v_ctrl_provider_gem_to_dmabuf {
 
 #define V_CTRL_PROVIDER_CREATE			0x0
 #define V_CTRL_PROVIDER_DESTROY			0x1
-#define V_CTRL_PROVIDER_GEM_TO_DMABUF		0x2
+#define V_CTRL_PROVIDER_GEM_TO_DMABUF	0x2
+#define V_CTRL_PROVIDER_GEM_TO_PADDR	0x3
 
 #define V_CTRL_IOCTL_PROVIDER_CREATE		V_CTRL_IOWR(V_CTRL_PROVIDER_CREATE, struct v_ctrl_provider_create)
 #define V_CTRL_IOCTL_PROVIDER_DESTROY		V_CTRL_IOWR(V_CTRL_PROVIDER_DESTROY, struct v_ctrl_provider_destroy)
 #define V_CTRL_IOCTL_PROVIDER_GEM_TO_DMABUF	V_CTRL_IOWR(V_CTRL_PROVIDER_GEM_TO_DMABUF, struct v_ctrl_provider_gem_to_dmabuf)
+#define V_CTRL_IOCTL_PROVIDER_GEM_TO_PADDR	V_CTRL_IOWR(V_CTRL_PROVIDER_GEM_TO_PADDR, struct v_ctrl_provider_gem_to_paddr)
 #endif

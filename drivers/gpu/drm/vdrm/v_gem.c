@@ -25,6 +25,12 @@ uint32_t v_gem_get_v_ctrl_gem_handle(struct drm_gem_object *bo)
 	return v_controller_get_gem_handle(v_obj->vctrl_gem);
 }
 
+dma_addr_t v_gem_get_paddr(struct drm_gem_object *bo)
+{
+	struct v_gem_object *v_obj = to_v_bo(bo);
+	return v_obj->paddr;
+}
+
 #ifdef CONFIG_DEBUG_FS
 
 void v_gem_describe_objects(struct list_head *list, struct seq_file *m)
