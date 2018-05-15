@@ -350,9 +350,6 @@ static int v_gem_dmabuf_mmap(struct dma_buf *buffer,
 	struct drm_gem_object *obj = buffer->priv;
 	int ret = 0;
 
-	if (WARN_ON(!obj->filp))
-		return -EINVAL;
-
 	ret = drm_gem_mmap_obj(obj, obj->size, vma);
 	if (ret < 0)
 		return ret;
