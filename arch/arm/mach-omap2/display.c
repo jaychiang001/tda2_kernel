@@ -302,6 +302,13 @@ int __init omap_display_init(struct omap_dss_board_info *board_data)
 	struct platform_device *dss_pdev;
 	enum omapdss_version ver;
 
+	/* create DRM device */
+	r = omap_init_drm();
+	if (r < 0) {
+		pr_err("Unable to register omapdrm device\n");
+		return r;
+	}
+
 	/* create omapdss device */
 
 	ver = omap_display_get_version();
@@ -386,13 +393,6 @@ int __init omap_display_init(struct omap_dss_board_info *board_data)
 			pr_err("Could not build platform_device for omapdss_sdi\n");
 			return PTR_ERR(pdev);
 		}
-	}
-
-	/* create DRM device */
-	r = omap_init_drm();
-	if (r < 0) {
-		pr_err("Unable to register omapdrm device\n");
-		return r;
 	}
 
 	/* create vrfb device */
@@ -606,6 +606,13 @@ int __init omapdss_init_of(void)
 		.set_min_bus_tput = omap_dss_set_min_bus_tput,
 	};
 
+	/* create DRM device */
+	r = omap_init_drm();
+	if (r < 0) {
+		pr_err("Unable to register omapdrm device\n");
+		return r;
+	}
+
 	/* only create dss helper devices if dss is enabled in the .dts */
 
 	node = omapdss_find_dss_of_node();
@@ -642,13 +649,6 @@ int __init omapdss_init_of(void)
 	r = platform_device_register(&omap_display_device);
 	if (r < 0) {
 		pr_err("Unable to register omapdss device\n");
-		return r;
-	}
-
-	/* create DRM device */
-	r = omap_init_drm();
-	if (r < 0) {
-		pr_err("Unable to register omapdrm device\n");
 		return r;
 	}
 

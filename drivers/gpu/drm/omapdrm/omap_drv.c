@@ -752,6 +752,9 @@ static int dev_load(struct drm_device *dev, unsigned long flags)
 	INIT_LIST_HEAD(&priv->obj_list);
 
 	omap_gem_init(dev);
+	drm_mode_config_init(dev);
+	dev_set_drvdata(dev->dev, dev);
+	return 0;
 
 	ret = omap_modeset_init(dev);
 	if (ret) {
@@ -954,19 +957,6 @@ static struct drm_driver omap_drm_driver = {
 
 static int pdev_probe(struct platform_device *device)
 {
-	int r;
-
-	if (omapdss_is_initialized() == false)
-		return -EPROBE_DEFER;
-
-	omap_crtc_pre_init();
-
-	r = omap_connect_dssdevs();
-	if (r) {
-		omap_crtc_pre_uninit();
-		return r;
-	}
-
 	DBG("%s", device->name);
 	return drm_platform_init(&omap_drm_driver, device);
 }
