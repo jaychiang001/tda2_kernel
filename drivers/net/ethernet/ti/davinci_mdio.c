@@ -78,7 +78,7 @@ struct davinci_mdio_regs {
 	u32	userintmasked;
 	u32	userintmaskset;
 	u32	userintmaskclr;
-	u32	__reserved_1[20];
+	u32	__reserved_1[22];
 
 	struct {
 		u32	access;

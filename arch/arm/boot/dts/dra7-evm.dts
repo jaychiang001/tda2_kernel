@@ -14,9 +14,15 @@
 	model = "TI DRA742";
 	compatible = "ti,dra7-evm", "ti,dra742", "ti,dra74", "ti,dra7";
 
+	cpus {
+			cpu@1 {
+				status = "disabled";
+			};
+	};
+
 	memory {
 		device_type = "memory";
-		reg = <0x0 0x80000000 0x0 0x60000000>; /* 1536 MB */
+		reg = <0x0 0x80000000 0x0 0x40000000>; /* 1024 MB */
 	};
 
 	reserved_mem: reserved-memory {
@@ -1060,16 +1066,22 @@ i2c_p3_exp: &i2c2 {
 	dual_emac;
 };
 
+&davinci_mdio {
+	reset-gpios = <&gpio3 16 GPIO_ACTIVE_LOW>;
+	reset-delay-us = <2>;
+};
+
 &cpsw_emac0 {
-	phy_id = <&davinci_mdio>, <2>;
-	phy-mode = "rgmii";
+	phy_id = <&davinci_mdio>, <1>;
+	phy-mode = "rmii";
 	dual_emac_res_vlan = <1>;
 };
 
 &cpsw_emac1 {
-	phy_id = <&davinci_mdio>, <3>;
-	phy-mode = "rgmii";
+	phy_id = <&davinci_mdio>, <2>;
+	phy-mode = "rmii";
 	dual_emac_res_vlan = <2>;
+	status = "disabled";
 };
 
 &mailbox5 {
